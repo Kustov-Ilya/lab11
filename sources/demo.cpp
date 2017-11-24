@@ -19,17 +19,14 @@ void Print(const std::string &path)
 
 int main(int argc, char** argv) {
 	try {
-		std::string text;
 		std::string pathfile;
-		std::string name;
 		variables_map vm_console;
 		variables_map vm_file;
 		options_description desc{ "Options" };
 		desc.add_options()
 			("output", value<std::string>(), "Set name to lf")
 			("variable", value<std::string>(&pathfile))
-			("Help", "Help screen")
-			;
+			("Help", "Help screen");
 
 		store(parse_command_line(argc, argv, desc), vm_console);
 		notify(vm_console);
