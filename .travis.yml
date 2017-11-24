@@ -6,4 +6,3 @@ notifications:
 script:   
 - cmake -H. -B_build
 - cmake --build _build
-- _build/cget https://www.yandex.ru
