@@ -1,5 +1,4 @@
-#include<print.hpp>
-#include<iostream>
+#include <print.hpp>
 #include <fstream>
 #include <cstring>
 #include <boost/filesystem.hpp>
@@ -8,14 +7,27 @@
 using namespace boost::filesystem;
 using namespace boost::program_options;
 
+void Print(const std::string &path)
+{
+	std::string text;
+	while (std::cin >> text) {
+		std::ofstream out(path, std::ios_base::app);
+		print(text, out);
+		out << std::endl;
+	}
+}
+
 int main(int argc, char** argv) {
 	try {
 		std::string text;
-
+		std::string pathfile;
+		std::string name;
 		options_description desc{ "Options" };
 		desc.add_options()
-			("help,h", "Help screen")
-			("output", value<std::string>()/*->notifier(out_func)*/, "Output");
+			("output", value<std::string>(), "set name to logfile")
+			("variable", value<std::string>(&pathfile))
+			("name", value<std::string>(&name), "from config file")
+			;
 
 		variables_map vm_console;
 		variables_map vm_file;
@@ -36,43 +48,16 @@ int main(int argc, char** argv) {
 			std::cout << desc << '\n';
 		}
 		else if (vm_console.count("output")) {
-
-			std::cout << "Output in >> " << vm_console["output"].as<std::string>() << '\n';
-			std::ofstream out(vm_console["output"].as<std::string>(), std::ios_base::app);
-			while (std::cin >> text) {
-				print(text, out);
-				out << std::endl;
-			}
-			out.close();
-
+			Print(vm_console["output"].as<std::string>());
 		}
 		else if (getenv("DEMO_OUTPUT") != nullptr) {
-			std::cout << "ENV" << std::endl;
-			std::string _trAddress = getenv("DEMO_OUTPUT");
-			std::ofstream out(_trAddress, std::ios_base::app);
-			while (std::cin >> text) {
-				print(text, out);
-				out << std::endl;
-			}
-			out.close();
+			Print(getenv("DEMO_OUTPUT"));
 		}
 		else if (vm_file.count("output")) {
-			std::cout << "Output in >> " << vm_file["output"].as<std::string>() << '\n';
-			std::ofstream out(vm_file["output"].as<std::string>(), std::ios_base::app);
-			while (std::cin >> text) {
-				print(text, out);
-				out << std::endl;
-			}
-			out.close();
+			Print(vm_file["output"].as<std::string>());
 		}
 		else {
-			std::cout << "DEFAULT" << std::endl;
-			std::ofstream out("default.log", std::ios_base::app);
-			while (std::cin >> text) {
-				print(text, out);
-				out << std::endl;
-			}
-			out.close();
+			Print("default.log");
 		}
 
 	}
