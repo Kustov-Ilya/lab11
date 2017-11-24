@@ -22,29 +22,25 @@ int main(int argc, char** argv) {
 		std::string text;
 		std::string pathfile;
 		std::string name;
-		options_description desc{ "Options" };
-		desc.add_options()
-			("output", value<std::string>(), "set name to logfile")
-			("variable", value<std::string>(&pathfile))
-			("name", value<std::string>(&name), "from config file")
-			;
-
 		variables_map vm_console;
 		variables_map vm_file;
+		options_description desc{ "Options" };
+		desc.add_options()
+			("output", value<std::string>(), "Set name to lf")
+			("variable", value<std::string>(&pathfile))
+			("Help", "Help screen")
+			;
 
 		store(parse_command_line(argc, argv, desc), vm_console);
 		notify(vm_console);
 
 		std::string gAddress = getenv("HOME");
 		gAddress += "/.config/demo.cfg";
-		const char* _gAddress = gAddress.c_str();
-
-		if (exists(gAddress))
-			store(parse_config_file<char>(_gAddress, desc), vm_file);
-
+		
+		store(parse_config_file<char>(gAddress.c_str(), desc), vm_file);
 		notify(vm_file);
 
-		if (vm_console.count("help") || vm_file.count("help")) {
+		if (vm_console.count("Help") || vm_file.count("Help")) {
 			std::cout << desc << '\n';
 		}
 		else if (vm_console.count("output")) {
@@ -52,6 +48,12 @@ int main(int argc, char** argv) {
 		}
 		else if (getenv("DEMO_OUTPUT") != nullptr) {
 			Print(getenv("DEMO_OUTPUT"));
+		}
+		else if (vm_file.count("Help")) {
+			Print(vm_file["Help"].as<std::string>());
+		}
+		else if (vm_console.count("Help")) {
+			Print(vm_console["Help"].as<std::string>());
 		}
 		else if (vm_file.count("output")) {
 			Print(vm_file["output"].as<std::string>());
