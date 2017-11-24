@@ -1,76 +1,55 @@
 #include <print.hpp>
-#include <fstream>
-#include <cstring>
-#include <boost/filesystem.hpp>
+#include <cstdlib>
 #include <boost/program_options.hpp>
 
-using namespace boost::filesystem;
-using namespace boost::program_options;
 
-int main(int argc, char** argv) {
-    try {
-        std::string text;
+namespace po = boost::program_options;
 
-        options_description desc{"Options"};
-        desc.add_options()
-        ("help,h", "Help screen")
-        ("output", value<std::string>()/*->notifier(out_func)*/, "Output");
+void PrintF(const std::string &path)
+{
+	std::string text;
+	while(std::cin >> text) {
+		std::ofstream out(path, std::ios_base::app);
+		print(text, out);
+		out << std::endl;
+	}
+}
 
-        variables_map vm_console;
-        variables_map vm_file;
-        
-        store(parse_command_line(argc, argv, desc), vm_console);
-        notify(vm_console);
+int main(int argc, char** argv)
+{
+	std::string pathfile;
+	std::string name;
+	po::options_description desc("Allowed optins");
+	desc.add_options()
+			("output", po::value<std::string>(), "set name to logfile")
+			("variable", po::value<std::string>(&pathfile))
+			("name", po::value<std::string>(&name), "from config file")
+	;
 
-        std::string gAddress = getenv("HOME");
-        gAddress += "/.config/demo.cfg";
-        const char* _gAddress = gAddress.c_str();
+	po::variables_map vm;
+	std::string pathconf = std::getenv("HOME");
+	pathconf += "/.config/demo.cfg";
 
-        if(exists(gAddress))
-            store(parse_config_file<char>( _gAddress, desc ), vm_file);
+	std::ifstream configfile(pathconf);
+	po::store(po::parse_command_line(argc, argv, desc), vm);
+	po::store(po::parse_environment(desc,
+		[](const std::string &env_var)
+		{
+			return env_var == "DEMO_OUTPUT" ? "variable" : "";
+		}),
+		vm);
+	po::store(po::parse_config_file(configfile, desc), vm);
+	po::notify(vm);
 
-        notify(vm_file);
-
-        if (vm_console.count("help") || vm_file.count("help")) {
-            std::cout << desc << '\n';
-        } else if(vm_console.count("output")) {
-
-            std::cout << "Output in >> " << vm_console["output"].as<std::string>() << '\n';
-            std::ofstream out(vm_console["output"].as<std::string>(), std::ios_base::app);
-            while(std::cin >> text) {
-                print(text, out);
-                out << std::endl;
-            }
-            out.close();
-
-        } else if (getenv("DEMO_OUTPUT") != nullptr) {
-            std::cout << "ENV" << std::endl;
-            std::string _trAddress = getenv("DEMO_OUTPUT");
-            std::ofstream out(_trAddress, std::ios_base::app);
-            while(std::cin >> text) {
-                print(text, out);
-                out << std::endl;
-            }
-            out.close();
-        } else if (vm_file.count("output")) {
-            std::cout << "Output in >> " << vm_file["output"].as<std::string>() << '\n';
-            std::ofstream out(vm_file["output"].as<std::string>(), std::ios_base::app);
-            while(std::cin >> text) {
-                print(text, out);
-                out << std::endl;
-            }
-            out.close();
-        } else {
-            std::cout << "DEFAULT" << std::endl;
-            std::ofstream out("default.log", std::ios_base::app);
-            while(std::cin >> text) {
-                print(text, out);
-                out << std::endl;
-            }
-            out.close();
-        }
-
-    } catch (const error &ex) {
-        std::cerr << ex.what() << '\n';
-    }
+	if (vm.count("output")) {
+		PrintF(vm["output"].as<std::string>());
+	} else if (!pathfile.empty()) {
+		PrintF(pathfile);
+	} else if (!name.empty()) {
+		PrintF(name);
+	} else {
+		PrintF("default.log");
+	}
+	configfile.close();
+	return 0;
 }
