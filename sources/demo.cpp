@@ -37,7 +37,8 @@ int main(int argc, char** argv) {
 		std::string gAddress = getenv("HOME");
 		gAddress += "/.config/demo.cfg";
 		
-		store(parse_config_file<char>(gAddress.c_str(), desc), vm_file);
+		if (exists(gAddress))
+			store(parse_config_file<char>(gAddress.c_str(), desc), vm_file);
 		notify(vm_file);
 
 		if (vm_console.count("help") || vm_file.count("help")) {
