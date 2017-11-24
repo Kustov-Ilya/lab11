@@ -5,7 +5,7 @@
 
 namespace po = boost::program_options;
 
-void PrintF(const std::string &path)
+void PrintFile(const std::string &path)
 {
 	std::string text;
 	while(std::cin >> text) {
@@ -14,6 +14,15 @@ void PrintF(const std::string &path)
 		out << std::endl;
 	}
 }
+
+/*void ReadFile(po::options_description &desc,
+							po::variables_map& vm)
+{
+	std::ifstream configfile("~/.config/demo.cfg");
+	vm = po::variables_map();
+	po::store(po::parse_config_file(configfile, desc), vm);
+	po::notify(vm);
+}*/
 
 int main(int argc, char** argv)
 {
@@ -42,13 +51,13 @@ int main(int argc, char** argv)
 	po::notify(vm);
 
 	if (vm.count("output")) {
-		PrintF(vm["output"].as<std::string>());
+		PrintFile(vm["output"].as<std::string>());
 	} else if (!pathfile.empty()) {
-		PrintF(pathfile);
+		PrintFile(pathfile);
 	} else if (!name.empty()) {
-		PrintF(name);
+		PrintFile(name);
 	} else {
-		PrintF("default.log");
+		PrintFile("default.log");
 	}
 	configfile.close();
 	return 0;
