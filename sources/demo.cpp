@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
 		store(parse_config_file<char>(gAddress.c_str(), desc), vm_file);
 		notify(vm_file);
 
-		if (vm_console.count("Help") || vm_file.count("Help")) {
+		if (vm_console.count("help") || vm_file.count("help")) {
 			std::cout << desc << '\n';
 		}
 		else if (vm_console.count("output")) {
@@ -48,12 +48,6 @@ int main(int argc, char** argv) {
 		}
 		else if (getenv("DEMO_OUTPUT") != nullptr) {
 			Print(getenv("DEMO_OUTPUT"));
-		}
-		else if (vm_file.count("Help")) {
-			Print(vm_file["Help"].as<std::string>());
-		}
-		else if (vm_console.count("Help")) {
-			Print(vm_console["Help"].as<std::string>());
 		}
 		else if (vm_file.count("output")) {
 			Print(vm_file["output"].as<std::string>());
